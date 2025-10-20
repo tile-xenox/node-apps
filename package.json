@@ -1,0 +1,13 @@
+{
+  "name": "@tile/my-node-apps",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/app/*",
+    "packages/util/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "packageManager": "pnpm@10.18.3"
+}
