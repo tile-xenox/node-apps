@@ -23,6 +23,21 @@ importers:
         specifier: ^2.0.5
         version: 2.1.9(@types/node@22.18.11)
 
+  packages/util/fp:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.5.4
+        version: 22.18.11
+      typescript:
+        specifier: ^5.5.3
+        version: 5.9.3
+      vite:
+        specifier: ^5.4.1
+        version: 5.4.21(@types/node@22.18.11)
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@types/node@22.18.11)
+
   packages/util/match:
     devDependencies:
       '@types/node':
