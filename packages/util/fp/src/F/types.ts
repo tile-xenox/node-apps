@@ -31,4 +31,4 @@ export type Memo = <A, M, B>(f: (a: A, m: M) => B) => [(a: A, m: M) => A, (a: A,
 
 export type Exchange = <A, M>() => [(a: A, m: M) => M, (a: A, m: M) => A];
 
-export type Recursive = <B>() => <A, M>(f: (r: (a: A, m: M) => B) => (a: A, m: M) => B) => (a: A, m: M) => B;
+export type Recursive = <A, M, B>(f: (a: A, m: M, r: (a: A, m: M) => B) => B) => (a: A, m: M) => B;

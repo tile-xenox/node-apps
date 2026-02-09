@@ -23,7 +23,7 @@ export type Flat = <A, E, F>() => (a: Result<Result<A, E>, F>) => Result<A, E | 
 export type FlatE = <A, B, E>() => (a: Result<A, Result<B, E>>) => Result<A | B, E>;
 
 export type Filter = {
-    <A, M, B extends A>(f: (a: A, m: M) => a is B): (a: A, m: M) => Result<B, A>;
+    <A, M, B extends A>(f: (a: A, m: M) => a is B): (a: A, m: M) => Result<B, Exclude<A, B>>;
     <A, M>(f: (a: A, m: M) => boolean): (a: A, m: M) => Result<A, A>;
     <A, M>(f: (a: A, m: M) => Promise<boolean>): (a: A, m: M) => Promise<Result<A, A>>;
 }
