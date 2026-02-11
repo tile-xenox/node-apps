@@ -40,12 +40,20 @@ type MapE = <E, M, F>(f: (e: E, m: M) => F) => <A>(a: Result<A, E>, m: M) => Res
 const mapE: MapE = (f) => (a, m) => isErr(a) ? err(f(a.err, m)) : a;
 
 
+type Flat = () => <A, E, F>(a: Result<Result<A, E>, F>) => Result<A, E | F>;
+const flat: Flat = () => (a) => R.isOk(a) ? a.ok : a;
+
+
+type FlatE = () => <A, B, E>(a: Result<A, Result<B, E>>) => Result<A | B, E>;
+const flatE: FlatE = () => (a) => isErr(a) ? a.err : a;
+
+
 type FlatMap = <A, B, F, M>(f: (a: A, m: M) => Result<B, F>) => <E>(a: Result<A, E>, m: M) => Result<B, E | F>;
-const flatMap: FlatMap = (f) => (a, m) => isOk(a) ? f(a.ok, m) : a;
+const flatMap: FlatMap = (f) => (a, m) => flat()(map(f)(a, m));
 
 
 type FlatMapE = <B, E, F, M>(f: (a: E, m: M) => Result<B, F>) => <A>(a: Result<A, E>, m: M) => Result<A | B, F>;
-const flatMapE: FlatMapE = (f) => (a, m) => isErr(a) ? f(a.err, m) : a;
+const flatMapE: FlatMapE = (f) => (a, m) => flatE()(mapE(f)(a, m));
 
 
 type Get = <B, E, M>(f: (e: E, m: M) => B) => <A>(a: Result<A, E>, m: M) => A | B;
@@ -112,6 +120,8 @@ export type R = {
     map: Map,
     mapE: MapE,
     get: Get,
+    flat: Flat,
+    flatE: FlatE,
     flatMap: FlatMap,
     flatMapE: FlatMapE,
     filter: Filter,
@@ -131,6 +141,8 @@ export const R: R = {
     isErr,
     map,
     mapE,
+    flat,
+    flatE,
     flatMap,
     flatMapE,
     get,

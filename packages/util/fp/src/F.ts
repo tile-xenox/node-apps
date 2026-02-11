@@ -1,17 +1,18 @@
 import { fp, type MaybePromise } from "./__inner__";
+import type { IsNever, IsUnion, Compute } from  './util.js';
 
-type State = { a: unknown, m: unknown, p: boolean };
-type Init = { a: undefined, m: undefined, p: false };
+type State = { a: unknown, m: unknown, p: 't' | 'f' | 'b' };
+type Init = { a: undefined, m: undefined, p: 'f' };
 
-type Or<A, B, C> = [A, B, C] extends [false, false, false] ? false : true;
-type IsP<A> = A extends Promise<any> ? true : false;
+type IsP<A> = A extends Promise<any> ? 't' : 'f';
+type Mode<A, F = IsP<A>> = IsNever<A> extends true ? 'f' : IsUnion<F> extends true ? 'b' : F;
 
-type Compute<T> = { [K in keyof T]: T[K] } | never;
+type NextP<S> = S extends 'fff' ? 'f' : S extends `${string}t${string}` ? 't' : 'b';
 
 type Next<S extends State, A, M> = {
     a: Awaited<A>,
     m: Awaited<M>,
-    p: Or<S['p'], IsP<A>, IsP<M>>,
+    p: NextP<`${S['p']}${Mode<A>}${Mode<M>}`>,
 };
 
 type Pipeline<S extends State> = {
@@ -21,7 +22,11 @@ type Pipeline<S extends State> = {
     ) => Pipeline<Compute<Next<S, A, M>>>,
 };
 
-type Return<S extends State> = S['p'] extends true ? Promise<S['a']> : S['a'];
+type Return<S extends State> = {
+    t: Promise<S['a']>,
+    f: S['a'],
+    b: MaybePromise<S['a']>,
+}[S['p']];
 
 
 type C = (a: unknown, m: unknown) => unknown;

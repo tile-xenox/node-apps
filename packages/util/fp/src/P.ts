@@ -1,7 +1,8 @@
+import { tp, type MaybePromise } from "./__inner__";
 import type { Applicative1 } from "./HKT";
 
-type Tap = <A, M>(f: (a: A, m: M) => Promise<unknown>) => (a: A, m: M) => Promise<A>;
-const tap: Tap = (f) => (a, m) => f(a, m).then(() => a);
+type Tap = <A, M>(f: (a: A, m: M) => MaybePromise<unknown>) => (a: A, m: M) => Promise<A>;
+const tap: Tap = (f) => (a, m) => tp(f)(a, m).then(() => a);
 
 
 type App = () => Applicative1<'Promise'>;
