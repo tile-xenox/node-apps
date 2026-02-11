@@ -79,10 +79,10 @@ type Exchange = <A, M>() => [(a: A, m: M) => M, (a: A, m: M) => A];
 const exchange: Exchange = () => [(_, m) => m, (a) => a];
 
 
-type Recursive = <A, M, B>(f: (a: A, m: M, r: (a: A, m: M) => B) => B) => (a: A, m: M) => B;
-const recursive: Recursive = <A, M, B>(f: (a: A, m: M, r: (a: A, m: M) => B) => B) => {
+type Recursive = <A, M, B>(f: (a: A, b: { m: M, r: (a: A, m: M) => B }) => B) => (a: A, m: M) => B;
+const recursive: Recursive = <A, M, B>(f: (a: A, b: { m: M, r: (a: A, m: M) => B }) => B) => {
     type X = (x: X) => (a: A, m: M) => B;
-    const x: X = (x) => (a, m) => f(a, m, x(x));
+    const x: X = (x) => (a, m) => f(a, { m, r: x(x) });
     return x(x);
 };
 

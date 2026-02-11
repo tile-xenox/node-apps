@@ -19,11 +19,11 @@ const mapE: MapE = (f) => (a, m) => R.seqE(P.app())(R.mapE(tp(f))(a, m));
 
 
 type FlatMap = <A, B, E, F, M>(f: (a: A, m: M) => MaybePromise<Result<B, F>>) => (a: Result<A, E>, m: M) => Promise<Result<B, E | F>>;
-const flatMap: FlatMap = (f) => (a, m) => R.seq(P.app())(R.map(tp(f))(a, m)).then(R.flat());
+const flatMap: FlatMap = (f) => (a, m) => R.seq(P.app())(R.map(tp(f))(a, m)).then(R.flat);
 
 
 type FlatMapE = <A, B, E, F, M>(f: (a: E, m: M) => MaybePromise<Result<B, F>>) => (a: Result<A, E>, m: M) => Promise<Result<A | B, F>>;
-const flatMapE: FlatMapE = (f) => (a, m) => R.seqE(P.app())(R.mapE(tp(f))(a, m)).then(R.flatE());
+const flatMapE: FlatMapE = (f) => (a, m) => R.seqE(P.app())(R.mapE(tp(f))(a, m)).then(R.flatE);
 
 
 export type RP = {

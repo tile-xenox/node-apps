@@ -40,20 +40,20 @@ type MapE = <E, M, F>(f: (e: E, m: M) => F) => <A>(a: Result<A, E>, m: M) => Res
 const mapE: MapE = (f) => (a, m) => isErr(a) ? err(f(a.err, m)) : a;
 
 
-type Flat = () => <A, E, F>(a: Result<Result<A, E>, F>) => Result<A, E | F>;
-const flat: Flat = () => (a) => R.isOk(a) ? a.ok : a;
+type Flat = <A, E, F>(a: Result<Result<A, E>, F>) => Result<A, E | F>;
+const flat: Flat = (a) => R.isOk(a) ? a.ok : a;
 
 
-type FlatE = () => <A, B, E>(a: Result<A, Result<B, E>>) => Result<A | B, E>;
-const flatE: FlatE = () => (a) => isErr(a) ? a.err : a;
+type FlatE = <A, B, E>(a: Result<A, Result<B, E>>) => Result<A | B, E>;
+const flatE: FlatE = (a) => isErr(a) ? a.err : a;
 
 
 type FlatMap = <A, B, F, M>(f: (a: A, m: M) => Result<B, F>) => <E>(a: Result<A, E>, m: M) => Result<B, E | F>;
-const flatMap: FlatMap = (f) => (a, m) => flat()(map(f)(a, m));
+const flatMap: FlatMap = (f) => (a, m) => flat(map(f)(a, m));
 
 
 type FlatMapE = <B, E, F, M>(f: (a: E, m: M) => Result<B, F>) => <A>(a: Result<A, E>, m: M) => Result<A | B, F>;
-const flatMapE: FlatMapE = (f) => (a, m) => flatE()(mapE(f)(a, m));
+const flatMapE: FlatMapE = (f) => (a, m) => flatE(mapE(f)(a, m));
 
 
 type Get = <B, E, M>(f: (e: E, m: M) => B) => <A>(a: Result<A, E>, m: M) => A | B;
@@ -78,11 +78,11 @@ const try_: Try = (f) => (a, m) => {
 };
 
 
-type Zip = <A, B, C, E, F>(f: (a: A, b: B) => C) => (a: Result<A, E>, m: Result<B, F>) => Result<C, E | F>;
+type Zip = <A, B, C>(f: (a: A, b: B) => C) => <E, F>(a: Result<A, E>, m: Result<B, F>) => Result<C, E | F>;
 const zip: Zip = (f) => (a, m) => isOk(a) ? (isOk(m) ? ok(f(a.ok, m.ok)) : m) : a;
 
 
-type ZipE = <A, B, E, F, G>(f: (a: E, b: F) => G) => (a: Result<A, E>, m: Result<B, F>) => Result<A | B, G>;
+type ZipE = <E, F, G>(f: (a: E, b: F) => G) => <A, B>(a: Result<A, E>, m: Result<B, F>) => Result<A | B, G>;
 const zipE: ZipE = (f) => (a, m) => isErr(a) ? (isErr(m) ? err(f(a.err, m.err)) : m) : a;
 
 
