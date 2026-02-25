@@ -87,7 +87,7 @@ describe('F', () => {
         const actual = F.pipe(
             (p) => p
                 .next(() => 5)
-                .next(F.memo(F.recursive((a, { m, r }): number => a === 0 ? 1 : a * r(a - 1, m))))
+                .next(F.memo(F.recursive((a, _, r): number => a === 0 ? 1 : a * r(a - 1))))
                 .next((a, m) => a + m)
         );
 

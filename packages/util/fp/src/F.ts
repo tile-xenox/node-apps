@@ -63,8 +63,8 @@ const pipe: Pipe = (line) => {
 };
 
 
-type Flow = <A, M, S extends State>(line: (p: Pipeline<Compute<Next<Init, A, M>>>) => Pipeline<S>) => (a: A, m: M) => Return<S>;
-const flow: Flow = (line) => (a, m) => pipe((p) => line(p.next([() => a, () => m])));
+type Flow = <A, M, R extends unknown[], S extends State>(line: (p: Pipeline<Compute<Next<Init, A, M>>>, ...r: R) => Pipeline<S>) => (a: A, m: M, ...r: R) => Return<S>;
+const flow: Flow = (line) => (a, m, ...r) => pipe((p) => line(p.next([() => a, () => m]), ...r));
 
 
 type Tap = <A, M>(f: (a: A, m: M) => unknown) => (a: A, m: M) => A;
@@ -79,11 +79,11 @@ type Exchange = <A, M>() => [(a: A, m: M) => M, (a: A, m: M) => A];
 const exchange: Exchange = () => [(_, m) => m, (a) => a];
 
 
-type Recursive = <A, M, B>(f: (a: A, b: { m: M, r: (a: A, m: M) => B }) => B) => (a: A, m: M) => B;
-const recursive: Recursive = <A, M, B>(f: (a: A, b: { m: M, r: (a: A, m: M) => B }) => B) => {
-    type X = (x: X) => (a: A, m: M) => B;
-    const x: X = (x) => (a, m) => f(a, { m, r: x(x) });
-    return x(x);
+type Recursive = <A, M, B>(f: (a: A, m: M, r: (a: A) => B) => B) => (a: A, m: M) => B;
+const recursive: Recursive = <A, M, B>(f: (a: A, m: M, r: (a: A) => B) => B) => {
+    type X = (x: X) => (m: M) => (a: A) => B;
+    const x: X = (x) => (m) => (a) => f(a, m, x(x)(m));
+    return (a: A, m: M) => x(x)(m)(a);
 };
 
 

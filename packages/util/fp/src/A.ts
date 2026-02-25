@@ -6,61 +6,61 @@ import type {
     Sequence1,
 } from './HKT.js';
 
-type Map = <A, M, B>(f: (a: A, b: { i: number, m: M }) => B) => (a: A[], m: M) => B[];
-const map: Map = (f) => (a, m) => a.map((e, i) => f(e, { i, m }));
+type Map = <A, M, B>(f: (a: A, m: M, i: number) => B) => (a: A[], m: M) => B[];
+const map: Map = (f) => (a, m) => a.map((e, i) => f(e, m, i));
 
 
 type Filter = {
-    <A, M, B extends A>(f: (a: A, b: { i: number, m: M }) => a is B): (a: A[], m: M) => B[];
-    <A, M>(f: (a: A, b: { i: number, m: M }) => boolean): (a: A[], m: M) => A[];
+    <A, M, B extends A>(f: (a: A, m: M, i: number) => a is B): (a: A[], m: M) => B[];
+    <A, M>(f: (a: A, m: M, i: number) => boolean): (a: A[], m: M) => A[];
 };
-const filter: Filter = <A, M>(f: (a: A, b: { i: number, m: M }) => boolean) => (a: A[], m: M) => a.filter((e, i) => f(e, { i, m }));
+const filter: Filter = <A, M>(f: (a: A, m: M, i: number) => boolean) => (a: A[], m: M) => a.filter((e, i) => f(e, m, i));
 
 
-type Reduce = <A, M, B>(b: (m: M) => B, f: (c: A, b: { p: B, i: number, m: M }) => B) => (a: A[], m: M) => B;
-const reduce: Reduce = (b, f) => (a, m) => a.reduce((p, c, i) => f(c, { p, i, m }), b(m));
+type Reduce = <A, M, B>(b: (m: M) => B, f: (c: A, m: M, p: B, i: number) => B) => (a: A[], m: M) => B;
+const reduce: Reduce = (b, f) => (a, m) => a.reduce((p, c, i) => f(c, m, p, i), b(m));
 
 
 type Find = {
-    <A, M, B extends A>(f: (a: A, b: { i: number, m: M }) => a is B): (a: A[], m: M) => B | undefined;
-    <A, M>(f: (a: A, b: { i: number, m: M }) => boolean): (a: A[], m: M) => A | undefined;
+    <A, M, B extends A>(f: (a: A, m: M, i: number) => a is B): (a: A[], m: M) => B | undefined;
+    <A, M>(f: (a: A, m: M, i: number) => boolean): (a: A[], m: M) => A | undefined;
 };
-const find: Find = <A, M>(f: (a: A, b: { i: number, m: M }) => boolean) => (a: A[], m: M) => a.find((e, i) => f(e, { i, m }));
+const find: Find = <A, M>(f: (a: A, m: M, i: number) => boolean) => (a: A[], m: M) => a.find((e, i) => f(e, m, i));
 
 
-type FlatMap = <A, M, B>(f: (a: A, b: { i: number, m: M }) => B[]) => (a: A[], m: M) => B[];
-const flatMap: FlatMap = (f) => (a, m) => a.flatMap((e, i) => f(e, { i, m }));
+type FlatMap = <A, M, B>(f: (a: A, m: M, i: number) => B[]) => (a: A[], m: M) => B[];
+const flatMap: FlatMap = (f) => (a, m) => a.flatMap((e, i) => f(e, m, i));
 
 
 type Every = {
-    <A, M, B extends A>(f: (a: A, b: { i: number, m: M }) => a is B): (a: A[], m: M) => a is B[];
-    <A, M>(f: (a: A, b: { i: number, m: M }) => boolean): (a: A[], m: M) => boolean;
+    <A, M, B extends A>(f: (a: A, m: M, i: number) => a is B): (a: A[], m: M) => a is B[];
+    <A, M>(f: (a: A, m: M, i: number) => boolean): (a: A[], m: M) => boolean;
 };
-const every: Every = <A, M>(f: (a: A, b: { i: number, m: M }) => boolean) => ((a: A[], m: M) => a.every((e, i) => f(e, { i, m }))) as never;
+const every: Every = <A, M>(f: (a: A, m: M, i: number) => boolean) => ((a: A[], m: M) => a.every((e, i) => f(e, m, i))) as never;
 
 
-type Some = <A, M>(f: (a: A, b: { i: number, m: M }) => boolean) => (a: A[], m: M) => boolean;
-const some: Some = (f) => (a, m) => a.some((e, i) => f(e, { i, m }));
+type Some = <A, M>(f: (a: A, m: M, i: number) => boolean) => (a: A[], m: M) => boolean;
+const some: Some = (f) => (a, m) => a.some((e, i) => f(e, m, i));
 
 
 type Sort = <A, M>(...ords: ((a: A, b: A, m: M) => number)[]) => (a: A[], m: M) => A[];
 const sort: Sort = (...ords) => (a, m) => a.sort((a, b) => ords.reduce((p, c) => p || c(a, b, m), 0));
 
 
-type GroupBy = <A, M, B>(f: (a: A, b: { i: number, m: M }) => B) => (a: A[], m: M) => [B, A[]][];
-const groupBy: GroupBy = (f) => (a, m) => [...Map.groupBy(a, (e, i) => f(e, { i, m }))];
+type GroupBy = <A, M, B>(f: (a: A, m: M, i: number) => B) => (a: A[], m: M) => [B, A[]][];
+const groupBy: GroupBy = (f) => (a, m) => [...Map.groupBy(a, (e, i) => f(e, m, i))];
 
 
 type Tuple = <A, M, B extends [unknown, ...unknown[]]>(f: (a: A, m: M) => B) => (a: A, m: M) => B;
 const tuple: Tuple = (f) => f;
 
 
-type From = <A, M, B>(l: (a: A, m: M) => number, f: (i: number, v: { a: A, m: M }) => B) => (a: A, m: M) => B[];
-const from: From = (l, f) => (a, m) => Array.from({ length: l(a, m) }, (_, i) => f(i, { a, m }));
+type From = <A, M, B>(l: (a: A, m: M) => number, f: (a: A, m: M, i: number) => B) => (a: A, m: M) => B[];
+const from: From = (l, f) => (a, m) => Array.from({ length: l(a, m) }, (_, i) => f(a, m, i));
 
 
 type Zip = <A, M, B>(f: (a: A, m: M) => B) => (a: A[], m: M[]) => B[];
-const zip: Zip = (f) => from((a, m) => Math.min(a.length, m.length), (i, { a, m }) => f(a[i], m[i]));
+const zip: Zip = (f) => from((a, m) => Math.min(a.length, m.length), (a, m, i) => f(a[i], m[i]));
 
 
 type SemiG = <A = never>() => SemiGroup<A[]>;
