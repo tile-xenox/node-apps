@@ -31,3 +31,7 @@ export type Union2Tuple<T, L = LastOf<T>> = IsNever<T> extends true ? [] : [...U
 type Primitive = number | string | boolean | symbol;
 export type Meta<T extends Primitive, M> = Record<never, M> & T;
 export type GetMeta<T> = T extends Record<never, infer M> & T ? M : never;
+
+export interface Fn { I: unknown, O: unknown }
+
+export type Call<F extends Fn, A> = (F & { I: A })['O'];
