@@ -35,3 +35,7 @@ export type GetMeta<T> = T extends Record<never, infer M> & T ? M : never;
 export interface Fn { I: unknown, O: unknown }
 
 export type Call<F extends Fn, A> = (F & { I: A })['O'];
+
+export type Pipe<A, FS extends Fn[]> = FS extends [infer F extends Fn, ...infer R extends Fn[]]
+    ? Pipe<Call<F, A>, R>
+    : A

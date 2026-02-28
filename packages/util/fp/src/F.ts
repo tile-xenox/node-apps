@@ -1,5 +1,5 @@
+import type { IsNever, IsUnion, Compute } from  '@tile/type-util';
 import { fp, type MaybePromise } from "./__inner__";
-import type { IsNever, IsUnion, Compute } from  './util.js';
 
 type State = { a: unknown, m: unknown, p: 't' | 'f' | 'b' };
 type Init = { a: undefined, m: undefined, p: 'f' };
