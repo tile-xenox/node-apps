@@ -65,7 +65,7 @@ type UpdateBars<S extends State, C extends Command> = {
             direction: S['direction'],
             blocks: S['blocks'],
             ball: S['ball'],
-            bars: { [K in keyof S['bars']]: Sub<S['bars'][K] & Axis> }
+            bars: { [K in keyof S['bars']]: Sub<S['bars'][K] & BarAxis> }
         },
     '-': S,
     '>': 6 extends S['bars'][Command]
@@ -74,7 +74,7 @@ type UpdateBars<S extends State, C extends Command> = {
             direction: S['direction'],
             blocks: S['blocks'],
             ball: S['ball'],
-            bars: { [K in keyof S['bars']]: Add<S['bars'][K] & Axis> }
+            bars: { [K in keyof S['bars']]: Add<S['bars'][K] & BarAxis> }
         },
 }[C]
 
