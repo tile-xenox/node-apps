@@ -1,6 +1,5 @@
 // config
-type AxisY = [1, 2, 3, 4, 5]
-type AxisX = [1, 2, 3, 4, 5]
+type Size = { x: 5, y: 5 }
 
 type InitState = {
   x: 'add', y: 'sub',
@@ -31,6 +30,13 @@ type Result = BreakoutGame<''>
 
 
 // program
+type MakeAxis<N, Acc extends unknown[] = [unknown]> = Acc['length'] extends N
+    ? [Acc['length']]
+    : [Acc['length'], ...MakeAxis<N, [...Acc, unknown]>]
+
+type AxisY = MakeAxis<Size['y']>
+type AxisX = MakeAxis<Size['x']>
+
 type AxisY_ = AxisY[number]
 type AxisX_ = AxisX[number]
 
@@ -55,11 +61,12 @@ type AddMap = {
     17: 18,
     18: 19,
     19: 20,
-    20: never,
+    20: 21,
+    21: 21,
 }
 
 type SubMap = {
-    0: never,
+    0: 0,
     1: 0,
     2: 1,
     3: 2,
@@ -80,6 +87,7 @@ type SubMap = {
     18: 17,
     19: 18,
     20: 19,
+    21: 20,
 }
 
 type BarMin = Exclude<SubMap[AxisX_], AxisX_>
@@ -93,11 +101,11 @@ type MaxX = Exclude<AxisX_, SubMap[AxisX_]>
 type MinY = Exclude<AxisY_, AddMap[AxisY_]>
 type MaxY = Exclude<AxisY_, SubMap[AxisY_]>
 
-type Direction = 'add' | 'sub'
 type InverseMap = {
     add: 'sub',
     sub: 'add',
 }
+type Direction = keyof InverseMap
 
 type Command = '<' | '-' | '>'
 type BarType = '>' | '-' | '<'
