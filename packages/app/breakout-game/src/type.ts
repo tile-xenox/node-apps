@@ -25,7 +25,6 @@ type Display = {
 }
 
 // game
-
 type Result = BreakoutGame<''>
 
 
@@ -174,11 +173,7 @@ type UpdateByBar<S extends State> = S['ball']['x'] extends S['bars'][BarType]
         x: S['x'],
         y: S['y'],
         blocks: S['blocks'],
-        ball: {
-            x: S['ball']['x'],
-            y: S['ball']['y'],
-            e: false,
-        },
+        ball: Omit<S['ball'], 'e'> & { e: false },
         bars: S['bars'],
     }
 
@@ -195,8 +190,8 @@ type CheckConflict<S extends State> = S['ball'] extends S['blocks'][number]
         ball: S['ball'],
         bars: S['bars'],
     }
-    : S['ball']['x'] extends MinX | MaxX
-        ? S['ball']['y'] extends MaxY
+    : S['ball']['y'] extends MaxY
+        ? S['ball']['x'] extends MinX | MaxX
             ? {
                 x: InverseMap[S['x']],
                 y: InverseMap[S['y']],
@@ -204,53 +199,45 @@ type CheckConflict<S extends State> = S['ball'] extends S['blocks'][number]
                 ball: S['ball'],
                 bars: S['bars'],
             }
-            : S['ball']['y'] extends MinY
-                ? UpdateByBar<{
-                    x: InverseMap[S['x']],
-                    y: S['y'],
-                    blocks: S['blocks'],
-                    ball: S['ball'],
-                    bars: S['bars'],
-                }>
-                : {
-                    x: InverseMap[S['x']],
-                    y: S['y'],
-                    blocks: S['blocks'],
-                    ball: S['ball'],
-                    bars: S['bars'],
-                }
-        : S['ball']['y'] extends MaxY
-            ? {
+            : {
                 x: S['x'],
                 y: InverseMap[S['y']],
                 blocks: S['blocks'],
                 ball: S['ball'],
                 bars: S['bars'],
             }
-            : S['ball']['y'] extends MinY
-                ? UpdateByBar<S>
-                : S
+        : S['ball']['y'] extends MinY
+            ? UpdateByBar<S> extends infer T extends State
+                ? T['ball']['x'] extends MinX | MaxX
+                    ? {
+                        x: InverseMap[T['x']],
+                        y: T['y'],
+                        blocks: T['blocks'],
+                        ball: T['ball'],
+                        bars: T['bars'],
+                    }
+                    : T
+                : never
+            : S
 
-type MoveBall<S extends State> = {
-    x: S['x'],
-    y: S['y'],
-    blocks: S['blocks'],
-    ball: {
-        x: {
-            add: AddMap[S['ball']['x']],
-            sub: SubMap[S['ball']['x']],
-        }[S['x']],
-        y: {
-            add: AddMap[S['ball']['y']],
-            sub: SubMap[S['ball']['y']],
-        }[S['y']],
-        e: true,
-    },
-    bars: S['bars'],
-}
-
-type UpdateState<S extends State, C extends Command> = S['ball']['e'] extends true
-    ? MoveBall<CheckConflict<UpdateBarMap<S>[C] & State> & State>
+type MoveBall<S extends State> = S['ball']['e'] extends true
+    ? {
+        x: S['x'],
+        y: S['y'],
+        blocks: S['blocks'],
+        ball: {
+            x: {
+                add: AddMap[S['ball']['x']],
+                sub: SubMap[S['ball']['x']],
+            }[S['x']],
+            y: {
+                add: AddMap[S['ball']['y']],
+                sub: SubMap[S['ball']['y']],
+            }[S['y']],
+            e: true,
+        },
+        bars: S['bars'],
+    }
     : S
 
 type Pos<S extends State, X extends AxisX_, Y extends AxisY_> = S['ball']['e'] extends false
@@ -287,5 +274,5 @@ export type BreakoutGame<
     S extends State = InitState,
     T extends unknown[] = [],
 > = L extends `${infer C extends Command}${infer R}`
-    ? BreakoutGame<R, UpdateState<S, C> & State, [...T, unknown]>
+    ? BreakoutGame<R, MoveBall<CheckConflict<UpdateBarMap<S>[C] & State>> & State, [...T, unknown]>
     : Merge<Show<S, AxisY, { round: T['length'] }>>
