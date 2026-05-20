@@ -210,7 +210,7 @@ type CheckConflict<S extends State> = S['ball'] extends S['blocks'][number]
             ? UpdateByBar<S> extends infer T extends State
                 ? T['ball']['x'] extends MinX | MaxX
                     ? {
-                        x: InverseMap[T['x']],
+                        x: ({ [P in MinX]: 'add' } & { [P in MaxX]: 'sub' })[T['ball']['x']],
                         y: T['y'],
                         blocks: T['blocks'],
                         ball: T['ball'],
