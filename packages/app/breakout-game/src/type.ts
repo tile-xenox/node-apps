@@ -218,7 +218,15 @@ type CheckConflict<S extends State> = S['ball'] extends S['blocks'][number]
                     }
                     : T
                 : never
-            : S
+            : S['ball']['x'] extends MinX | MaxX
+                ? {
+                    x: InverseMap[S['x']],
+                    y: S['y'],
+                    blocks: S['blocks'],
+                    ball: S['ball'],
+                    bars: S['bars'],
+                }
+                : S
 
 type MoveBall<S extends State> = S['ball']['e'] extends true
     ? {
@@ -265,7 +273,7 @@ type Key<N extends number> = AxisY_ extends NeedPadZero
         ? `y0${N}`
         : `y${N}`
 
-type Show<S extends State, Y, Acc = {}> = Y extends [...infer R, infer F extends AxisY_]
+type Show<S extends State, Y, Acc> = Y extends [...infer R, infer F extends AxisY_]
     ? Show<S, R, Acc & { [P in F as Key<P>]: ShowLine<S, F, AxisX> }>
     : Acc
 
