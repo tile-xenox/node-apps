@@ -16,12 +16,12 @@ type InitState = {
 }
 
 type Display = {
-    block: '+',
-    ball: 'o',
-    space: ' ',
-    empty: '-',
-    gameover: 'x',
-    gameclear: 'o'
+    block: '🧱',
+    ball: '🎱',
+    space: '',
+    empty: '🌫',
+    gameOver: '💀',
+    gameClear: '🎉'
 }
 
 // game
@@ -254,9 +254,9 @@ type UpdateState<S extends State, C extends Command> = S['ball']['e'] extends tr
     : S
 
 type Pos<S extends State, X extends AxisX_, Y extends AxisY_> = S['ball']['e'] extends false
-    ? Display['gameover']
+    ? Display['gameOver']
     : S['blocks'][number]['e'] extends false
-        ? Display['gameclear']
+        ? Display['gameClear']
         : { x: X, y: Y, e: true } extends S['ball']
             ? Display['ball']
             : { x: X, y: Y, e: true } extends S['blocks'][number]
@@ -271,8 +271,15 @@ type ShowLine<S extends State, Y extends AxisY_, X, Acc extends string = ''> = X
     ? ShowLine<S, Y, R, `${Acc}${Display['space']}${Pos<S, F, Y>}`>
     : Acc
 
+type NeedPadZero = MakeAxis<9>[number]
+type Key<N extends number> = AxisY_ extends NeedPadZero
+    ? `y${N}`
+    : N extends NeedPadZero
+        ? `y0${N}`
+        : `y${N}`
+
 type Show<S extends State, Y, Acc = {}> = Y extends [...infer R, infer F extends AxisY_]
-    ? Show<S, R, Acc & { [P in F]: ShowLine<S, F, AxisX> }>
+    ? Show<S, R, Acc & { [P in F as Key<P>]: ShowLine<S, F, AxisX> }>
     : Acc
 
 export type BreakoutGame<
