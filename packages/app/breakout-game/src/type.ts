@@ -1,5 +1,8 @@
 // config
-type Size = { x: 5, y: 5 }
+// easy, normal, hard, hell
+type Mode = 'easy'
+// max 20 x 20
+type Size = { x: 7, y: 6 }
 
 type InitState = {
   x: 'add', y: 'sub',
@@ -7,17 +10,22 @@ type InitState = {
     { x: 2, y: 4, e: true },
     { x: 3, y: 4, e: true },
     { x: 4, y: 4, e: true },
+    { x: 5, y: 4, e: true },
+    { x: 6, y: 4, e: true },
     { x: 2, y: 3, e: true },
     { x: 3, y: 3, e: true },
     { x: 4, y: 3, e: true },
+    { x: 5, y: 3, e: true },
+    { x: 6, y: 3, e: true },
   ],
-  ball: { x: 3, y: 1, e: true },
-  bars: { '>': 2, '-': 3, '<': 4 },
+  ball: { x: 4, y: 1, e: true },
+  bars: { '>': 3, '-': 4, '<': 5 },
 }
 
 type Display = {
     block: '🧱',
     ball: '🎱',
+    bar: '🟧',
     space: '',
     empty: '🌫',
     gameOver: '💀',
@@ -248,33 +256,64 @@ type MoveBall<S extends State> = S['ball']['e'] extends true
     }
     : S
 
-type Pos<S extends State, X extends AxisX_, Y extends AxisY_> = S['ball']['e'] extends false
+type DispMinY = 0
+type DispY = [DispMinY, ...AxisY]
+type DispY_ = DispY[number]
+
+type GetMode<L> = L extends 0 ? 'easy' : Mode
+
+type DispBall = {
+    easy: Display['ball'],
+    normal: Display['ball'],
+    hard: Display['empty'],
+    hell: Display['empty'],
+}
+
+type DispBlock = {
+    easy: Display['block'],
+    normal: Display['block'],
+    hard: Display['block'],
+    hell: Display['empty'],
+}
+
+type DispBar = {
+    easy: Display['bar'],
+    normal: Display['empty'],
+    hard: Display['empty'],
+    hell: Display['empty'],
+}
+
+type Pos<S extends State, L, X extends AxisX_, Y extends DispY_> = S['ball']['e'] extends false
     ? Display['gameOver']
     : S['blocks'][number]['e'] extends false
         ? Display['gameClear']
         : { x: X, y: Y, e: true } extends S['ball']
-            ? Display['ball']
+            ? DispBall[GetMode<L>]
             : { x: X, y: Y, e: true } extends S['blocks'][number]
-                ? Display['block']
-                : Display['empty']
+                ? DispBlock[GetMode<L>]
+                : Y extends DispMinY
+                    ? X extends S['bars'][BarType]
+                        ? DispBar[GetMode<L>]
+                        : Display['empty']
+                    : Display['empty']
 
 type Merge<T> = {
     [K in keyof T]: T[K]
 }
 
-type ShowLine<S extends State, Y extends AxisY_, X, Acc extends string = ''> = X extends [infer F extends AxisX_, ...infer R]
-    ? ShowLine<S, Y, R, `${Acc}${Display['space']}${Pos<S, F, Y>}`>
+type ShowLine<S extends State, L, Y extends DispY_, X, Acc extends string = ''> = X extends [infer F extends AxisX_, ...infer R]
+    ? ShowLine<S, L, Y, R, `${Acc}${Display['space']}${Pos<S, L, F, Y>}`>
     : Acc
 
-type NeedPadZero = MakeAxis<9>[number]
+type NeedPadZero = DispMinY | MakeAxis<9>[number]
 type Key<N extends number> = AxisY_ extends NeedPadZero
     ? `y${N}`
     : N extends NeedPadZero
         ? `y0${N}`
         : `y${N}`
 
-type Show<S extends State, Y, Acc> = Y extends [...infer R, infer F extends AxisY_]
-    ? Show<S, R, Acc & { [P in F as Key<P>]: ShowLine<S, F, AxisX> }>
+type Show<S extends State, L, Y, Acc = { round: L }> = Y extends [...infer R, infer F extends DispY_]
+    ? Show<S, L, R, Acc & { [P in F as Key<P>]: ShowLine<S, L, F, AxisX> }>
     : Acc
 
 export type BreakoutGame<
@@ -283,4 +322,4 @@ export type BreakoutGame<
     T extends unknown[] = [],
 > = L extends `${infer C extends Command}${infer R}`
     ? BreakoutGame<R, MoveBall<CheckConflict<UpdateBarMap<S>[C] & State>> & State, [...T, unknown]>
-    : Merge<Show<S, AxisY, { round: T['length'] }>>
+    : Merge<Show<S, T['length'], DispY>>
