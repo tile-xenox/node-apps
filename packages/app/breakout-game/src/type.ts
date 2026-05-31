@@ -1,8 +1,21 @@
+// game
+export type Result = BreakoutGame<''>
+
 // config
 // easy, normal, hard, hell
 type Mode = 'easy'
 // max 20 x 20
 type Size = { x: 7, y: 6 }
+
+type Display = {
+    block: '🧱',
+    ball: '🎱',
+    bar: '🟧',
+    space: '',
+    empty: '🌫',
+    gameOver: '💀',
+    gameClear: '🎉'
+}
 
 type InitState = {
   x: 'add', y: 'sub',
@@ -21,19 +34,6 @@ type InitState = {
   ball: { x: 4, y: 1, e: true },
   bars: { '>': 3, '-': 4, '<': 5 },
 }
-
-type Display = {
-    block: '🧱',
-    ball: '🎱',
-    bar: '🟧',
-    space: '',
-    empty: '🌫',
-    gameOver: '💀',
-    gameClear: '🎉'
-}
-
-// game
-type Result = BreakoutGame<''>
 
 
 // program
@@ -173,7 +173,7 @@ type UpdateByBar<S extends State> = S['ball']['x'] extends S['bars'][BarType]
                 '>': AddMap[S['ball']['x']],
             }[GetBarType<BarType, S>],
             y: S['ball']['y'],
-            e: true,
+            e: S['ball']['e'],
         },
         bars: S['bars'],
     }
